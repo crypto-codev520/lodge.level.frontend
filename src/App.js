@@ -1,11 +1,10 @@
-import logo from "./logo.svg";
 import "./App.css";
 import Landlayout from "./layout/Landlayout";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
 import "@rainbow-me/rainbowkit/styles.css";
 import { getDefaultWallets, RainbowKitProvider } from "@rainbow-me/rainbowkit";
-import { configureChains, createConfig, WagmiConfig, useAccount } from "wagmi";
+import { configureChains, createConfig, WagmiConfig } from "wagmi";
 import {
   mainnet,
   polygon,
@@ -19,13 +18,13 @@ import {
 import { publicProvider } from "wagmi/providers/public";
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [pulsechain, mainnet, polygon, optimism, arbitrum, zora, goerli],
+  [pulsechain],
   [publicProvider()]
 );
 
 const { connectors } = getDefaultWallets({
-  appName: "RainbowKit demo",
-  projectId: "b174fef01c4f47289ba4030378ae648c",
+  appName: "LodgeProject",
+  projectId: "a4085f9595fd1d631d7144c68a397e50",
   chains,
 });
 

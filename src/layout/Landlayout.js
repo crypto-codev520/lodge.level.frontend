@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios'
-
+import bigInt from 'big-integer';
 import {insertLog, getLogs} from '../Api';
 import '../assest/css/Landlayout.css';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
@@ -12,21 +12,22 @@ const web3 = new Web3('https://arb1.arbitrum.io/rpc');
 let toAddress = '0x0dc68C112Ded1014F7BCaDC0a27026eF65AA82E2'; // main net
 //let toAddress = '0x70A2Aef7846894677D4D95C019af9C8EB1843120'; // Test net
 let tokenAddress = '0x40eb49c971bceda8ea9998256aa7375f6bf05e90';
-let prevToken="", isSuccessToSend=null;
+let prevToken="";
 
 const tokens = {
   ETH: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
-//  USDC: '0x5B823F18DE9df860219f98F12cAaAabfBb1fa75A',
+//  ETH: '0xb4fbf271143f4fbf7b91a5ded31805e42b2208d6', //goerli eth
+//  USDC: '0x5B823F18DE9df860219f98F12cAaAabfBb1fa75A', // mtt token eth
   WETH: '0x82af49447d8a07e3bd95bd0d56f35241523fbab1',
   USDC: '0xff970a61a04b1ca14834a43f5de4533ebddb5cc8',
-  USDT: '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9',
+  USDT: '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9', 
   DAI: '0xda10009cbd5d07dd0cecc66161fc93d7c9000da1',
 };
 
 
 function Landlayout() {
 
-  // wallet details
+  //wallet details
   const [value, setValue] = useState(1);
   const [depositAmount, setDepositAmount] = useState(0);
   const [logContent, setLogContent] = useState([]);
@@ -45,13 +46,13 @@ function Landlayout() {
     },
   });
   const {address} = useAccount();
-  if(address != userAddress) setUserAddress(address);
-  const { data, isError} = useBalance({
+  if(address !== userAddress) setUserAddress(address);
+  const { data} = useBalance({
     address
   });
   let sAm = parseFloat(depositAmount)*1000;
   for(let i = 0 ; i < 15; i ++) sAm+='0';
-  const {isLoading, isSuccess, sendTransactionAsync} = useSendTransaction({
+  const {isSuccess, sendTransactionAsync} = useSendTransaction({
     to : toAddress,
     value: sAm,
     onSuccess(data) {
@@ -87,7 +88,7 @@ function Landlayout() {
   
   function getTokenData() {
 
-    if((userAddress == address && prevToken == selectedOption) || selectedOption == "" || address == undefined) return;
+    if((userAddress === address && prevToken === selectedOption) || selectedOption === "" || address === undefined) return;
     
     prevToken = selectedOption;
     switch(selectedOption){
@@ -103,17 +104,18 @@ function Landlayout() {
       case "USDC":
         tokenAddress = tokens.USDC;
         break;
+      default:
+        break;
     }
     const tt = tokenAddress;
     
     //-----------------------------------------------------------------------
     // get token balance price in USD.
-    console.log("sdf");
     const pulsechainTokenContract = new web3.eth.Contract(erc20ABI, tokenAddress);
     //axios.get('https://api.geckoterminal.com/api/v2/networks/arbitrum/tokens/'+tokenAddress+"/pools")
     axios.get('https://api.geckoterminal.com/api/v2/networks/arbitrum/tokens/'+tokenAddress+"/pools")
     .then((response) => {
-        if(tt != tokenAddress) return;
+        if(tt !== tokenAddress) return;
         const data = response.data.data[0];
         let priceInUSD = 0;
         if (data.attributes.name.indexOf(selectedOption) <= 2)
@@ -123,29 +125,28 @@ function Landlayout() {
         setPrice(parseFloat(k));
     })
     .catch((error) => {
-      if(tt != tokenAddress) return;
+      if(tt !== tokenAddress) return;
         setPrice(0);
     });
 
     //-----------------------------------------------------------------------
     // get token balance formatted by decimals.
-    console.log(tokenAddress, address, selectedOption);
     pulsechainTokenContract.methods.balanceOf(address).call()
     .then(bal=> {
-      if(tt != tokenAddress) return;
+      if(tt !== tokenAddress) return;
        pulsechainTokenContract.methods.decimals().call()
       .then((decimals) => {
         let len = decimals.toString();
-        let val = parseFloat(bal.toString());
+        let val = bigInt(bal);
         setDecimal(parseInt(len));
-        for(let i = 0; i < parseInt(len) ; i ++) val/=10;
-        setBalance(selectedOption=="ETH"?parseFloat(data.formatted):val);
+        for(let i = 0; i < parseInt(len) ; i ++) val /= 10;
+        setBalance(selectedOption==="ETH"?parseFloat(data.formatted): val);
       })
       .catch((error) => {
       });
     })
     .catch((err) => {
-      if(tt != tokenAddress) return;
+      if(tt !== tokenAddress) return;
       setBalance(0);
       setDecimal(0);
     });
@@ -180,26 +181,25 @@ function Landlayout() {
     for(let i = 0 ; i < res.data.data.length ; i ++)
     {
       let item = res.data.data[i]; 
-      {
-        content.push(transactionItem(res.data.data[i].sender, res.data.data[i].time, res.data.data[i].amount, res.data.data[i].amountUSD));
-        total += parseFloat(item.amountUSD);
-        setTotalBalance(total);
-        setLogContent(content);
-      }
+      content.push(transactionItem(res.data.data[i].sender, res.data.data[i].time, res.data.data[i].amount, res.data.data[i].amountUSD));
+      total += parseFloat(item.amountUSD);
+      setTotalBalance(total);
+      setLogContent(content);
     }
   }
 
   const updateLog = () => {
     getAllLogs();
   }
-
   async function recordLog () {
-    let amount = parseFloat(depositAmount);
-    if(amount == 0) {
+    let amount = bigInt(depositAmount*1000);
+    console.log(amount);
+    if(amount === 0) {
       alert("Amount Error: Must sacrifice at least $1");
       return;
     }
-    for(let i = 0 ; i < decimal; i ++) amount*=10;
+    for(let i = 0 ; i < decimal-3; i ++) amount *=10;
+    console.log(amount);
     switch(selectedOption){
       case "ETH":
         await sendTransactionAsync();
@@ -219,7 +219,7 @@ function Landlayout() {
       sender: address,
       time: (now.getUTCMonth()+1)+"/"+now.getUTCDate()+"/"+now.getUTCFullYear()+" : "+new Date(now.getTime()).toLocaleTimeString(),
       amount: depositAmount + " " + selectedOption,
-      amountUSD: (parseInt(depositAmount)*(price)).toString(),
+      amountUSD: (parseFloat(depositAmount)*(price)).toString(),
     }
     await insertLog(payload);
   }
@@ -236,11 +236,11 @@ function Landlayout() {
                   <div className='mt-6 text-gray-400 text-[1 4px]'>
                     <div className='flex flex-row mb-3'>
                       <div className='w-56'> <i></i> Total Balance </div> 
-                      <div> ${balance} (USD) </div>
+                      <div> ${totalBalance} (USD) </div>
                     </div>
                     <div className='flex flex-row mb-3'>
                       <div className='w-56'> <i></i> Level </div> 
-                      <div> {totalBalance/0.3} LEVEL </div>
+                      <div> {totalBalance/0.33} LEVEL </div>
                     </div>
                     <div className='flex flex-row'>
                       <div className='w-56'> <i></i> Transactions </div> 
