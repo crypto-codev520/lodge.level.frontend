@@ -2,11 +2,16 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
+import icon from './favico.png';
 //import reportWebVitals from './reportWebVitals';
-
+import { Helmet } from 'react-helmet';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
+    <Helmet>
+      <title>Sacrifice</title>
+      <link rel="icon" type="image/png" href={icon} sizes="16x16" />
+    </Helmet>
     <App />
   </React.StrictMode>
 );
