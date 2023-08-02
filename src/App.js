@@ -18,7 +18,7 @@ import {
 import { publicProvider } from "wagmi/providers/public";
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [pulsechain],
+  [arbitrum],
   [publicProvider()]
 );
 
