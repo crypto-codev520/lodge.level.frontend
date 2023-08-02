@@ -9,7 +9,7 @@ root.render(
   <React.StrictMode>
     <Helmet>
       <title>Sacrifice</title>
-      <link rel="icon" type="image/png" href="/favico.png" />
+      <link rel="icon" type="image/png" href="%PUBLIC_URL%/favico.png" />
 
     </Helmet>
     <App />
