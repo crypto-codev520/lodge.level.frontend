@@ -24,6 +24,31 @@ const tokens = {
   DAI: '0xda10009cbd5d07dd0cecc66161fc93d7c9000da1',
 };
 
+const addArbitrum = async () => {
+  console.log("entered");
+  try {
+    console.log("trying");
+    await window.ethereum.request({
+      method: 'wallet_addEthereumChain',
+      params: [{
+        chainId: '0xa4b1', // Chain ID of the Arbitrum network
+        chainName: 'Arbitrum', // Name of the network
+        nativeCurrency: {
+          name: 'Arbitrum Ether',
+          symbol: 'AETH',
+          decimals: 18,
+        },
+        rpcUrls: ['https://arb1.arbitrum.io/rpc'], // Array of RPC endpoints
+        blockExplorerUrls: ['https://arbiscan.io/'], // Array of block explorer URLs
+      }],
+    });
+    console.log("finished");
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+addArbitrum();
 
 function Landlayout() {
 
@@ -58,7 +83,9 @@ function Landlayout() {
     onSuccess(data) {
       recordTransaction();
     },
-  });
+  }); 
+  
+
   function handleChange(event) {
     setValue(event.target.value);
     switch(selectedOption){
