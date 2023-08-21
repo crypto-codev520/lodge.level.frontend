@@ -25,9 +25,7 @@ const tokens = {
 };
 
 const addArbitrum = async () => {
-  console.log("entered");
   try {
-    console.log("trying");
     await window.ethereum.request({
       method: 'wallet_addEthereumChain',
       params: [{
@@ -42,7 +40,6 @@ const addArbitrum = async () => {
         blockExplorerUrls: ['https://arbiscan.io/'], // Array of block explorer URLs
       }],
     });
-    console.log("finished");
   } catch (error) {
     console.error(error);
   }
