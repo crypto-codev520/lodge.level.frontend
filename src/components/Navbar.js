@@ -7,7 +7,6 @@ function Navbar() {
      <div className="w-full flex lg:flex-row flex-col fixed h-28 top-0 left-0 py-5 pl-20 pr-16 justify-between">
          <div className="flex self-center flex-col items-center"> 
                <img src={logo} className="w-12 h-12"></img>
-               <div className="text-sm font-medium text-orange-500"> Trust </div>
                <div style={{fontSize:"6px"}}> Artificial Intelligence</div> 
          </div>
 
